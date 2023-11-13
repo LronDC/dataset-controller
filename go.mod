@@ -3,7 +3,6 @@ module github.com/DataTunerX/dataset-controller
 go 1.19
 
 require (
-	github.com/DataTunerX/utility-server v0.0.0-20231113045144-edcc3d47ffb4
 	github.com/onsi/ginkgo/v2 v2.6.0
 	github.com/onsi/gomega v1.24.1
 	github.com/qiniu/x v1.13.1
@@ -29,6 +28,7 @@ require (
 
 require (
 	github.com/DataTunerX/meta-server v0.0.0-20231109015709-57812268ad17
+	github.com/DataTunerX/utility-server v0.0.0-20231113045144-edcc3d47ffb4
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
