@@ -24,14 +24,15 @@ import (
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
+	"github.com/DataTunerX/dataset-controller/internal/controller"
+	extensionv1beta1 "github.com/DataTunerX/meta-server/api/extension/v1beta1"
+	"github.com/DataTunerX/utility-server/logging"
+	"github.com/go-logr/zapr"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
-	"github.com/DataTunerX/dataset-controller/internal/controller"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -42,6 +43,7 @@ var (
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+	utilruntime.Must(extensionv1beta1.AddToScheme(scheme))
 
 	//+kubebuilder:scaffold:scheme
 }
@@ -55,14 +57,13 @@ func main() {
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
-	opts := zap.Options{
-		Development: true,
-	}
-	opts.BindFlags(flag.CommandLine)
+
 	flag.Parse()
+	logging.NewZapLogger("debug")
+	ctrl.SetLogger(zapr.NewLogger(logging.ZLogger.GetLogger()))
 
-	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
-
+	// Make global logger
+	logger := logging.ZLogger
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
 		MetricsBindAddress:     metricsAddr,
@@ -90,6 +91,7 @@ func main() {
 	if err = (&controller.DatasetReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
+		Log:    logger,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Dataset")
 		os.Exit(1)
